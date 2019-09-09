@@ -99,13 +99,13 @@ class SocketThread implements Runnable {
        try
        {
          clientSentence = inFromClient.readLine();
-        
+
          if(!(clientSentence.substring(0,15).equals("REGISTER TORECV") ||  clientSentence.substring(0,15).equals("REGISTER TOSEND")))
          {
            outToClient.writeBytes("ERROR 101 No user registered1\n\n");
            return;
          }
-         
+
          if(clientSentence.split(" ").length!=4)
          {
            outToClient.writeBytes("ERROR 101 No user registered2\n\n");
@@ -122,6 +122,12 @@ class SocketThread implements Runnable {
            outToClient.writeBytes("ERROR 100 MALFORMED USERNAME\n\n");
          }
 
+         if((server.userReceiveTable.containsKey(username)) && (server.userSendTable.containsKey(username)) )
+         {
+           outToClient.writeBytes("ERROR 100 USERNAME already exists\n\n");
+           return;
+         }
+         
          if(clientSentence.substring(0,15).equals("REGISTER TORECV"))
          {
            server.userReceiveTable.put(username,userSocket);
@@ -203,7 +209,7 @@ class SocketThread implements Runnable {
               outToClient.writeBytes("ERROR 103 Header Incomplete3\n\n");
               continue;
            }
-          
+
            String recipentUsername = recipient.split(" ",2)[1];
            String message="";
            int count = Integer.parseInt(content_length.split(": ",2)[1]);
@@ -233,7 +239,7 @@ class SocketThread implements Runnable {
 
                if(ack_reipient.equals("RECEIVED "+username))
                {
-  
+
                     outToClient.writeBytes("SENT " + recipentUsername +"\n\n");
                     String dummy3 = inFromClient_recipient.readLine(); // \n from the recipient after received ack
                }

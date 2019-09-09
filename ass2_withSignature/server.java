@@ -118,6 +118,15 @@ class SocketThread implements Runnable {
          if(!checkUsername(username))
          {
            outToClient.writeBytes("ERROR 100 MALFORMED USERNAME\n\n");
+           return;
+         }
+
+
+
+         if((server.userReceiveTable.containsKey(username)) && (server.userSendTable.containsKey(username)) )
+         {
+           outToClient.writeBytes("ERROR 100 USERNAME already exists\n\n");
+           return;
          }
 
          if(clientSentence.substring(0,15).equals("REGISTER TORECV"))

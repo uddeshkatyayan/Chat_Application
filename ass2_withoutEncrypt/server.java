@@ -112,6 +112,12 @@ class SocketThread implements Runnable {
            outToClient.writeBytes("ERROR 100 MALFORMED USERNAME\n\n");
          }
 
+         if((server.userReceiveTable.containsKey(username)) && (server.userSendTable.containsKey(username)) )
+         {
+           outToClient.writeBytes("ERROR 100 USERNAME already exists\n\n");
+           return;
+         }
+
          if(clientSentence.substring(0,15).equals("REGISTER TORECV"))
          {
            server.userReceiveTable.put(username,userSocket);
@@ -172,7 +178,7 @@ class SocketThread implements Runnable {
            {
                message+=(char)inFromClient.read();
                count--;
-      
+
            }
 
            if (! server.userReceiveTable.containsKey(recipentUsername))
@@ -194,7 +200,7 @@ class SocketThread implements Runnable {
                if(ack_reipient.equals("RECEIVED "+username))
                {
                     outToClient.writeBytes("SENT " + recipentUsername +"\n\n");
-                    String dummy3 = inFromClient_recipient.readLine(); 
+                    String dummy3 = inFromClient_recipient.readLine();
                }
                else
                    outToClient.writeBytes("ERROR 102 Unable to send\n\n");

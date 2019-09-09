@@ -31,12 +31,12 @@ class TCPClient {
 
 				outToServer_SEND.writeBytes("REGISTER TOSEND " + username + "\n\n"); //registration message_send
 				String server_ack_SEND = inFromServer_SEND.readLine();
-				System.out.println(server_ack_SEND);
+				// System.out.println(server_ack_SEND);
         String dummy1 = inFromServer_SEND.readLine();
 
 				outToServer_RECEIVE.writeBytes("REGISTER TORECV "+ username + "\n\n");
 				String server_ack_RECEIVE = inFromServer_RECEIVE.readLine();
-				System.out.println(server_ack_RECEIVE);
+				// System.out.println(server_ack_RECEIVE);
         String dummy2 = inFromServer_RECEIVE.readLine();
 
 
@@ -46,6 +46,9 @@ class TCPClient {
           System.out.println(server_ack_RECEIVE);
 					return;
 				}
+
+        System.out.println(server_ack_SEND);
+        System.out.println(server_ack_RECEIVE);
 
 				SendThread send_thread = new SendThread(sendSocket,inFromUser,outToServer_SEND, inFromServer_SEND);
 
@@ -139,7 +142,7 @@ class ReceiveThread implements Runnable {
 			senderName = split_input[1];
 			String	content_length = inFromServer.readLine();
 
-			input_sentence=inFromServer.readLine(); 
+			input_sentence=inFromServer.readLine();
 
       String message="";
       int count = Integer.parseInt(content_length.split(": ",2)[1]);
