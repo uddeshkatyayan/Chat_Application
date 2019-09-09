@@ -101,7 +101,7 @@ class SendThread implements Runnable {
 
 	public void run()
 	{
-		while(TCPClient.userActive==1)
+		while(true)
 		{
 			try{
 
@@ -110,8 +110,7 @@ class SendThread implements Runnable {
         if(input_sentence.equalsIgnoreCase("DEREGISTER"))
         {
             outToServer.writeBytes("DEREGISTER" + "\n\n");
-            TCPClient.userActive=0;
-            System.out.println("DEREGISTERED");
+            System.out.println("DEREGISTERED TOSEND");
             break;
         }
 				String[] split_input = input_sentence.split(" ", 2);
@@ -193,7 +192,7 @@ class ReceiveThread implements Runnable {
       CryptographyExample crypto = new CryptographyExample();
 			String senderName;
 			input_sentence = inFromServer.readLine();
-      if(input_sentence.equals("DEREGISTER TOSEND"))
+      if(input_sentence.equals("DEREGISTER"))
       {
         String dummy8 = inFromServer.readLine();
         break;

@@ -144,7 +144,7 @@ class SocketThread implements Runnable {
 
            if(fetchReq.equals("DEREGISTER"))
            {
-             Quadruple sender_receive_socket = server.userReceiveTable.get(username);
+              Quadruple sender_receive_socket = server.userReceiveTable.get(username);
               sender_receive_socket.getValue2().writeBytes("DEREGISTER"+"\n\n");
               server.userReceiveTable.remove(username);
               server.userSendTable.remove(username);

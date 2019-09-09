@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-// import org.javatuples.Quadruple;
 
 public class server
 {
@@ -45,8 +44,6 @@ class TCPServer {
 
   public static void main(String args[]) throws IOException
     {
-      // userSendTable = new Hashtable<String,Socket>();
-      // userSendTable = new Hashtable<String,Socket>();
 
       ServerSocket welcomeSocket = new ServerSocket(6789);
 
@@ -91,7 +88,6 @@ class SocketThread implements Runnable {
          int c = (int)name.charAt(i);
          if( (c>=65 && c<=91) || (c>=97 && c<=122) || (c>=48 && c<=57) )
             continue;
-        // System.out.println("PRINTING FALSE "+ c);
          return false;
        }
        return true;
@@ -103,13 +99,13 @@ class SocketThread implements Runnable {
        try
        {
          clientSentence = inFromClient.readLine();
-         // System.out.println(clientSentence);
+        
          if(!(clientSentence.substring(0,15).equals("REGISTER TORECV") ||  clientSentence.substring(0,15).equals("REGISTER TOSEND")))
          {
            outToClient.writeBytes("ERROR 101 No user registered1\n\n");
            return;
          }
-         // System.out.println(clientSentence);
+         
          if(clientSentence.split(" ").length!=4)
          {
            outToClient.writeBytes("ERROR 101 No user registered2\n\n");
@@ -146,8 +142,17 @@ class SocketThread implements Runnable {
            String fetchReq = inFromClient.readLine();
            System.out.println(fetchReq);
 
-           System.out.println(!(fetchReq.split(" ",2)[0].equals("FETCHKEY")));
-           System.out.println(fetchReq.split(" ").length!=2);
+           if(fetchReq.equals("DEREGISTER"))
+           {
+              Quadruple sender_receive_socket = server.userReceiveTable.get(username);
+              sender_receive_socket.getValue2().writeBytes("DEREGISTER"+"\n\n");
+              server.userReceiveTable.remove(username);
+              server.userSendTable.remove(username);
+
+              String dummy7 = inFromClient.readLine();
+              break;
+           }
+
            if(fetchReq.split(" ").length!=2 || !(fetchReq.split(" ",2)[0].equals("FETCHKEY")))
            {
               outToClient.writeBytes("ERROR 103 Header Incomplete4\n\n");
@@ -182,14 +187,6 @@ class SocketThread implements Runnable {
 
            System.out.println(recipient);
 
-           String signature = inFromClient.readLine();
-
-           if(content_length.split(" ").length!=2 || !(content_length.split(" ",2)[0].equals("Signature")))
-           {
-              outToClient.writeBytes("ERROR 103 Header Incomplete2\n\n");
-              continue;
-           }
-
 
            String content_length = inFromClient.readLine();
            if(content_length.split(" ").length!=2 || !(content_length.split(" ",2)[0].equals("Content-length:")))
@@ -198,7 +195,7 @@ class SocketThread implements Runnable {
               continue;
            }
 
-           // System.out.println(content_length+"  content_length");
+
 
            dummy = inFromClient.readLine();
            if(!dummy.equals(""))
@@ -206,9 +203,7 @@ class SocketThread implements Runnable {
               outToClient.writeBytes("ERROR 103 Header Incomplete3\n\n");
               continue;
            }
-           // dummy = inFromClient.readLine();
-
-           // System.out.println(dummy+"  dummy");
+          
            String recipentUsername = recipient.split(" ",2)[1];
            String message="";
            int count = Integer.parseInt(content_length.split(": ",2)[1]);
@@ -217,14 +212,8 @@ class SocketThread implements Runnable {
            {
                message+=(char)inFromClient.read();
                count--;
-               // System.out.println(message);
            }
 
-           // String message = inFromClient.readLine();
-
-
-
-           // System.out.println(username+ " " + content_length+" "+message+ " "+ recipentUsername);
 
            if (! server.userReceiveTable.containsKey(recipentUsername))
            {
@@ -237,37 +226,20 @@ class SocketThread implements Runnable {
                DataOutputStream outToClient_recipient =recipientSocket.getValue2();
                BufferedReader inFromClient_recipient = recipientSocket.getValue1();
 
-               outToClient_recipient.writeBytes("FORWARD "+username+"\n"+ signature + "\n" +content_length +"\n\n"+ message);
+               outToClient_recipient.writeBytes("FORWARD "+username+"\n"+content_length +"\n\n"+ message);
 
                String ack_reipient = inFromClient_recipient.readLine();
 
-               // System.out.println(ack_reipient);
-               // System.out.println("RECEIVED "+username);
 
                if(ack_reipient.equals("RECEIVED "+username))
                {
-                 // System.out.println("yaha aa rh hai");
+  
                     outToClient.writeBytes("SENT " + recipentUsername +"\n\n");
                     String dummy3 = inFromClient_recipient.readLine(); // \n from the recipient after received ack
                }
                else
                    outToClient.writeBytes("ERROR 102 Unable to send\n\n");
             }
-
-
-
-
-
-
-           // System.out.println("REGISTERED SEND : "+ username);
-
-  	     //       clientSentence = inFromClient.readLine();
-         //
-  		   // System.out.println(clientSentence);
-         //
-    	   //       capitalizedSentence = clientSentence.toUpperCase() + '\n';
-         //
-         //  	   outToClient.writeBytes(capitalizedSentence);
         }
       }
 	    catch(Exception e)  {
@@ -275,7 +247,6 @@ class SocketThread implements Runnable {
             {
 			           connectionSocket.close();
 		        } catch(Exception ee) { }
-		        // break
 	      }
     }
 }

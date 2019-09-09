@@ -57,25 +57,6 @@ class TCPClient {
 				send_thread_start.start();
 				receive_thread_start.start();
 
-
-
-
-
-
-        // while(true) {
-				//
-        //      sentence = inFromUser.readLine();
-				//
-        //      outToServer.writeBytes(sentence + '\n');
-				//
-        //      modifiedSentence = inFromServer.readLine();
-				//
-        //      System.out.println("FROM SERVER: " + modifiedSentence);
-				//
-        // }
-
-//        clientSocket.close();
-
     }
 }
 
@@ -101,6 +82,12 @@ class SendThread implements Runnable {
 		{
 			try{
 				input_sentence = inFromUser.readLine();
+				if(input_sentence.equalsIgnoreCase("DEREGISTER"))
+		        {
+		            outToServer.writeBytes("DEREGISTER" + "\n\n");
+		            System.out.println("DEREGISTERED TOSEND");
+		            break;
+		        }
 				String[] split_input = input_sentence.split(" ", 2);
 				if(split_input.length!=2 || input_sentence.charAt(0)!='@')
 				{
@@ -109,16 +96,9 @@ class SendThread implements Runnable {
 				}
 				int content_length = split_input[1].length();
 
-				// System.out.println("SEND " + split_input[0].substring(1)+"\n"+"Content-length: "+ content_length + "\n\n" + split_input[1]);
-				// System.out.println("done");
-
 				outToServer.writeBytes("SEND " + split_input[0].substring(1)+"\n"+"Content-length: "+ content_length + "\n\n" + split_input[1]);
+        		String ack_message = inFromServer.readLine();
 
-				// String ack_message = inFromServer.readLine(); //for the empty line sent from the server after sending the Registered to send message.
-        String ack_message = inFromServer.readLine();
-
-				// if(ack_message.substring(0,3).equals("ERR"))
-				// {
 				System.out.println(ack_message);
 				ack_message=inFromServer.readLine();
 
@@ -134,7 +114,6 @@ class ReceiveThread implements Runnable {
 	DataOutputStream outToServer;
 	BufferedReader inFromServer;
 
- // ReceiveThread(receiveSocket, inFromServer_RECEIVE, outToServer_RECEIVE )
 	ReceiveThread(Socket rs, BufferedReader ifs, DataOutputStream ots)
 	{
 		receiveSocket=rs;
@@ -150,14 +129,17 @@ class ReceiveThread implements Runnable {
 
 			String senderName;
 			input_sentence = inFromServer.readLine();
+			if(input_sentence.equals("DEREGISTER"))
+	        {
+	          String dummy8 = inFromServer.readLine();
+	          break;
+	        }
 			String[] split_input = input_sentence.split(" ",2);
 			System.out.println("FROM: "+ split_input[1]);
 			senderName = split_input[1];
 			String	content_length = inFromServer.readLine();
 
-			input_sentence=inFromServer.readLine(); //\n
-
-			// input_sentence=inFromServer.readLine();
+			input_sentence=inFromServer.readLine(); 
 
       String message="";
       int count = Integer.parseInt(content_length.split(": ",2)[1]);
@@ -166,155 +148,14 @@ class ReceiveThread implements Runnable {
       {
           message+=(char)inFromServer.read();
           count--;
-          // System.out.println(message);
       }
 
 			System.out.println(message);
-
-			// if(Integer.parseInt(string_len)==input_sentence.length())
 			outToServer.writeBytes("RECEIVED "+ senderName+"\n\n");
-			// else
-      // System.out.println("Received message from "+ senderName);
-
-			// outToServer.writeBytes("E"+ senderName+"\n\n");
-
 
 		}
 		catch(Exception e){}
 		}
+		System.out.println("DEREGISTERED TORECV");
 	}
 }
-
-
-
-
-
-
-
-// class TCPClient
-// {
-// 	public static void main(String args[])throws IOException
-// 	{
-// 		String sentence;
-// 		String modifiedSen;
-// 		InputStreamReader in = new InputStreamReader(System.in);
-// 		BufferedReader inFromUser = new BufferedReader(in);
-//
-// 		Socket send_Socket = new Socket("localhost", 6789);
-// 		Socket recieve_Socket = new Socket("localhost", 6789);
-//
-// 		// while(true)
-// 		// {
-// 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-// 			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//
-// 			//UserInterface: taking input from the terminal and forwarding the appropriate message top server
-// 			Thread userInterface = new Thread(new Runnable()
-//       {
-//           @Override
-//           public void run()
-// 					{
-// 							String msg = sentence.substring(sentence.indexOf(" "));
-// 							String user = sentence.substring(1, sentence.indexOf(" "));
-// 							outToServer.writeBytes("REGISTER TOSEND "+user+"\n");
-//               while (true)
-// 							{
-//                   // read the message to deliver.
-//                   String sentence = inFromUser.readLine();
-//                   try
-// 									{
-// 										String fromServer = inFromServer.readLine();
-// 										if(fromServer.equalsIgnoreCase("ERROR 100 Malformed "+user))
-// 										{
-// 											System.out.println("No such user found. \n Re-enter a valid user name");
-// 											continue;
-// 										}
-// 										// else if(fromServer.equalsIgnoreCase("REGISTERED TOSEND "+user))
-// 										// {
-// 										outToServer.writeBytes("REGISTER TORECV "+user+"\n");
-// 										fromServer = inFromServer.readLine();
-// 										// }
-// 										outToServer.writeBytes("SEND "+user+"\n");
-// 										outToServer.writeBytes("Content-length: "+msg.length()+"\n");
-// 										outToServer.writeBytes(msg+"\n");
-//
-// 										fromServer = inFromServer.readLine();
-//
-// 										if(fromServer.equals("SEND"))
-// 											System.out.println("Message Sent");
-// 										else
-// 											System.out.println("ERROR, Message not delivered. Please try again");
-//                     // dos.writeUTF(msg);
-//                   } catch (IOException e)
-//
-//               }
-//           }
-//       });
-//
-// 			Thread receiverInterface =  new Thread(new Runnable()
-//
-// 				@Override
-// 				public void run()
-// 				{
-//
-// 				}
-// 			)
-//
-//
-//
-// 			sentence =inFromUser.readLine();
-// 			if(sentence.equals("\n"))
-// 				break;
-// 			outToServer.writeBytes(sentence+'\n');
-// 			modifiedSen = inFromServer.readLine();
-// 			System.out.println("FROM SERVER: " + modifiedSen);
-// 		// }
-//
-// 		clientSocket.close();
-// 	}
-// }
-//
-//
-//
-//
-//
-//
-//
-// class UserInterface implements Runnable
-// {
-// 	String username;
-// 	String message;
-// 	Thread t;
-// 	UserInterface(String threadname)
-// 	{
-// 		t=new Thread(this,threadname);
-// 		t.start();
-// 	}
-// 	public void run()
-// 	{
-// 		try
-// 		{
-// 			BufferedReader inFromUser = new BufferedReader(InputStreamReader(System.in));
-// 			sentence = inFromUser.readLine();
-// 			if( ! sentence.isEmpty())
-// 			{
-// 				String msg = sentence.substring(sentence.indexOf(" "));
-// 				String user = sentence.substring(1, sentence.indexOf(" "));
-// 				this.username=user;
-// 				this.message=msg;
-// 			}
-// 		}
-// 		catch (InterruptedException e)
-// 			System.out.println("thread interrupted");
-// 	}
-//
-// 	public getUsername()
-// 	{
-// 		return this.username;
-// 	}
-//
-// 	public getMessage()
-// 	{
-// 		return this.message;
-// 	}
-// // }
